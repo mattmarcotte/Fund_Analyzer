@@ -174,6 +174,32 @@ Three things to know:
   change.
 - **Ingestion doesn't belong here.** Run the CLI locally or in CI.
 
+## Rate limiting
+
+Every fund lookup reaches sec.gov carrying this deployment's contact address,
+and Canadian lookups can pull a multi-megabyte CSV and write to Supabase. A
+crawler walking `/fund/<anything>` would do all of that under the operator's
+name, so the routes that trigger upstream work are capped per IP:
+
+| Route | Limit / min / IP |
+|---|---|
+| `/api/search` | 60 |
+| `/api/fund/[query]` and `/fund/[query]` | 30 |
+| `/api/enrich` | 20 |
+| `/api/lookthrough/[query]` | 10 |
+
+Over the limit returns `429` with `Retry-After` and `RateLimit-*` headers; the
+page route renders an explanatory card instead of a bare error.
+
+Enforced in the route handlers rather than in middleware — middleware bypass has
+been a recurring class of Next.js vulnerability, and a limiter that can be
+routed around isn't one.
+
+**Serverless caveat:** counters live in instance memory and reset on cold start,
+so the real ceiling is (limit x warm instances). That covers the actual threat —
+an unattended crawler — but not a distributed attacker. For that, swap `hit()`
+in `lib/rateLimit.ts` for a Vercel KV or Postgres counter; no call sites change.
+
 ## Architecture
 
 ```

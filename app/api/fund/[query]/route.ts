@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchSnapshot } from "@/lib/providers";
+import { enforce } from "@/lib/rateLimit";
 import { FundLookupError } from "@/lib/types";
 
 /** N-PORT parsing is CPU- and memory-heavy; keep it off the edge runtime. */
@@ -7,9 +8,12 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ query: string }> },
 ) {
+  const limited = enforce(request, "fund");
+  if (limited) return limited;
+
   const { query } = await params;
 
   try {

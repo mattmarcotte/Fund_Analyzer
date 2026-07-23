@@ -10,6 +10,7 @@ import {
   fetchIsharesCaLookThrough,
   storeConfigured,
 } from "@/lib/providers/isharesCaStore";
+import { enforce } from "@/lib/rateLimit";
 import { FundLookupError, type Holding } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -49,6 +50,9 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ query: string }> },
 ) {
+  const limited = enforce(request, "lookthrough");
+  if (limited) return limited;
+
   const { query } = await params;
   const decoded = decodeURIComponent(query);
   const depth = Number(new URL(request.url).searchParams.get("depth") ?? "2");

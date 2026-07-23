@@ -1,8 +1,10 @@
+import { headers } from "next/headers";
 import Link from "next/link";
 import { FundDashboard } from "@/components/FundDashboard";
 import { SearchBar } from "@/components/SearchBar";
 import { formatDate } from "@/components/format";
 import { fetchSnapshot } from "@/lib/providers";
+import { hit } from "@/lib/rateLimit";
 import { FundLookupError } from "@/lib/types";
 
 /** Filings are fetched live and cached in-process; never prerender. */
@@ -19,16 +21,35 @@ export default async function FundPage({
   let snapshot;
   let error: { message: string; hint?: string } | null = null;
 
-  try {
-    snapshot = await fetchSnapshot(decoded);
-  } catch (err) {
-    error =
-      err instanceof FundLookupError
-        ? { message: err.message, hint: err.hint }
-        : {
-            message:
-              err instanceof Error ? err.message : "Something went wrong.",
-          };
+  /*
+   * This page fetches upstream just like the API does, so it needs the same
+   * ceiling — otherwise a crawler walking /fund/<anything> sidesteps every
+   * limit by never touching /api.
+   */
+  const headerList = await headers();
+  const ip =
+    headerList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    headerList.get("x-real-ip")?.trim() ||
+    "unknown";
+  const limit = hit(ip, "fund");
+
+  if (!limit.ok) {
+    error = {
+      message: "Too many requests",
+      hint: `This deployment limits lookups to ${limit.limit} per minute per IP, so upstream data providers aren't hit hard on one operator's behalf. Try again in ${limit.retryAfter} seconds.`,
+    };
+  } else {
+    try {
+      snapshot = await fetchSnapshot(decoded);
+    } catch (err) {
+      error =
+        err instanceof FundLookupError
+          ? { message: err.message, hint: err.hint }
+          : {
+              message:
+                err instanceof Error ? err.message : "Something went wrong.",
+            };
+    }
   }
 
   return (

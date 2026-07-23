@@ -1,0 +1,266 @@
+{
+  "generatedAt": "2026-07-23T20:13:35.079Z",
+  "source": "https://www.ig.ca/en/investments/solutions/mutual-funds",
+  "funds": [
+    {
+      "slug": "ig-beutel-goodman-canadian-small-cap-fund",
+      "name": "IG Beutel Goodman Canadian Small Cap Fund",
+      "code": "F047"
+    },
+    {
+      "slug": "ig-blackrock-international-equity-fund",
+      "name": "IG BlackRock International Equity Fund",
+      "code": "F271"
+    },
+    {
+      "slug": "ig-fi-canadian-equity-fund",
+      "name": "IG FI Canadian Equity Fund",
+      "code": "F074"
+    },
+    {
+      "slug": "ig-franklin-clearbridge-canadian-equity-fund",
+      "name": "IG Franklin ClearBridge Canadian Equity Fund",
+      "code": "F150"
+    },
+    {
+      "slug": "ig-jpmorgan-emerging-markets-equity-fund",
+      "name": "IG JPMorgan Emerging Markets Equity Fund",
+      "code": "F323"
+    },
+    {
+      "slug": "ig-mackenzie-betterworld-sri-fund",
+      "name": "IG Mackenzie Betterworld SRI Fund",
+      "code": "F013"
+    },
+    {
+      "slug": "ig-mackenzie-canadian-bond-fund",
+      "name": "IG Mackenzie Canadian Bond Fund",
+      "code": "F061"
+    },
+    {
+      "slug": "investors-canadian-corporate-bond-fund",
+      "name": "IG Mackenzie Canadian Corporate Bond Fund",
+      "code": "F214"
+    },
+    {
+      "slug": "ig-mackenzie-canadian-dividend-fund",
+      "name": "IG Mackenzie Canadian Dividend & Income Equity Fund",
+      "code": "F157"
+    },
+    {
+      "slug": "ig-mackenzie-canadian-equity-fund",
+      "name": "IG Mackenzie Canadian Equity Fund",
+      "code": "F062"
+    },
+    {
+      "slug": "ig-mackenzie-canadian-money-market-fund",
+      "name": "IG Mackenzie Canadian Money Market Fund",
+      "code": "F012"
+    },
+    {
+      "slug": "investors-canadian-small-cap-fund",
+      "name": "IG Mackenzie Canadian Small Cap Fund",
+      "code": "F049"
+    },
+    {
+      "slug": "investors-dividend-fund",
+      "name": "IG Mackenzie Dividend Fund",
+      "code": "F008"
+    },
+    {
+      "slug": "investors-european-equity-fund",
+      "name": "IG Mackenzie European Equity Fund",
+      "code": "F021"
+    },
+    {
+      "slug": "investors-european-mid-cap-equity-fund",
+      "name": "IG Mackenzie European Mid-Cap Equity Fund",
+      "code": "F069"
+    },
+    {
+      "slug": "ig-mackenzie-floating-rate-income-fund",
+      "name": "IG Mackenzie Floating Rate Income Fund",
+      "code": "F230"
+    },
+    {
+      "slug": "ig-mackenzie-global-consumer-companies-fund",
+      "name": "IG Mackenzie Global Consumer Companies Fund",
+      "code": "F318"
+    },
+    {
+      "slug": "investors-global-dividend-fund",
+      "name": "IG Mackenzie Global Dividend Fund",
+      "code": "F159"
+    },
+    {
+      "slug": "ig-mackenzie-global-financial-services-fund",
+      "name": "IG Mackenzie Global Financial Services Fund",
+      "code": "F091"
+    },
+    {
+      "slug": "investors-global-fund",
+      "name": "IG Mackenzie Global Fund",
+      "code": "F014"
+    },
+    {
+      "slug": "ig-mackenzie-global-fund-ii",
+      "name": "IG Mackenzie Global Fund II",
+      "code": "F035"
+    },
+    {
+      "slug": "ig-mackenzie-global-health-care-fund",
+      "name": "IG Mackenzie Global Health Care Fund",
+      "code": "F316"
+    },
+    {
+      "slug": "ig-mackenzie-global-infrastructure-fund",
+      "name": "IG Mackenzie Global Infrastructure Fund",
+      "code": "F317"
+    },
+    {
+      "slug": "ig-mackenzie-global-precious-metals-fund",
+      "name": "IG Mackenzie Global Precious Metals Fund",
+      "code": "F315"
+    },
+    {
+      "slug": "ig-mackenzie-global-resource-fund",
+      "name": "IG Mackenzie Global Resource Fund",
+      "code": "F040"
+    },
+    {
+      "slug": "ig-mackenzie-global-resource-fund-ii",
+      "name": "IG Mackenzie Global Resource Fund II",
+      "code": "F319"
+    },
+    {
+      "slug": "investors-global-science-technology-fund",
+      "name": "IG Mackenzie Global Science & Technology Fund",
+      "code": "F051"
+    },
+    {
+      "slug": "ig-mackenzie-global-science-and-technology-fund-ii",
+      "name": "IG Mackenzie Global Science & Technology Fund II",
+      "code": "F320"
+    },
+    {
+      "slug": "ig-mackenzie-gqe-u-s-small-mid-cap-growth-fund",
+      "name": "IG Mackenzie GQE U.S. Small-Mid Cap Equity Fund",
+      "code": "F038"
+    },
+    {
+      "slug": "ig-mackenzie-gqe-u-s-small-mid-cap-growth-fund-ii",
+      "name": "IG Mackenzie GQE U.S. Small-Mid Cap Equity Fund II",
+      "code": "F326"
+    },
+    {
+      "slug": "ig-mackenzie-north-american-corporate-bond-fund",
+      "name": "IG Mackenzie High Yield Fixed Income Fund",
+      "code": "F041"
+    },
+    {
+      "slug": "investors-international-small-cap-fund",
+      "name": "IG Mackenzie International Small Cap Fund",
+      "code": "F252"
+    },
+    {
+      "slug": "investors-mortgage-and-short-term-income-fund",
+      "name": "IG Mackenzie Mortgage and Short Term Income Fund",
+      "code": "F005"
+    },
+    {
+      "slug": "investors-mutual-of-canada",
+      "name": "IG Mackenzie Mutual of Canada",
+      "code": "F002"
+    },
+    {
+      "slug": "investors-north-american-equity-fund",
+      "name": "IG Mackenzie North American Equity Fund",
+      "code": "F004"
+    },
+    {
+      "slug": "investors-pacific-international-fund",
+      "name": "IG Mackenzie Pacific International Fund",
+      "code": "F022"
+    },
+    {
+      "slug": "ig-mackenzie-pacific-international-fund-ii",
+      "name": "IG Mackenzie Pacific International Fund II",
+      "code": "F321"
+    },
+    {
+      "slug": "investors-pan-asian-equity-fund",
+      "name": "IG Mackenzie Pan Asian Equity Fund",
+      "code": "F092"
+    },
+    {
+      "slug": "ig-mackenzie-real-property-fund",
+      "name": "IG Mackenzie Real Property Fund",
+      "code": "F011"
+    },
+    {
+      "slug": "ig-mackenzie-strategic-income-fund",
+      "name": "IG Mackenzie Strategic Income Fund",
+      "code": "F221"
+    },
+    {
+      "slug": "investors-us-dividend-registered-fund",
+      "name": "IG Mackenzie U.S. Dividend Registered Fund",
+      "code": "F233"
+    },
+    {
+      "slug": "ig-mackenzie-us-dollar-fund-global-equity",
+      "name": "IG Mackenzie U.S. Dollar Fund - Global Equity",
+      "code": "F299"
+    },
+    {
+      "slug": "ig-mackenzie-us-dollar-fund-global-equity-balanced",
+      "name": "IG Mackenzie U.S. Dollar Fund - Global Equity Balanced",
+      "code": "F300"
+    },
+    {
+      "slug": "ig-mackenzie-us-dollar-fund-global-fixed-income-balanced",
+      "name": "IG Mackenzie U.S. Dollar Fund - Global Fixed Income Balanced",
+      "code": "F301"
+    },
+    {
+      "slug": "ig-mackenzie-us-dollar-fund-global-neutral-balanced",
+      "name": "IG Mackenzie U.S. Dollar Fund - Global Neutral Balanced",
+      "code": "F302"
+    },
+    {
+      "slug": "ig-mackenzie-us-equity-fund",
+      "name": "IG Mackenzie U.S. Equity Fund",
+      "code": "F217"
+    },
+    {
+      "slug": "ig-mackenzie-u-s-money-market-fund",
+      "name": "IG Mackenzie U.S. Money Market Fund",
+      "code": "F048"
+    },
+    {
+      "slug": "ig-manulife-strategic-income-fund",
+      "name": "IG Manulife Strategic Income Fund",
+      "code": "F344"
+    },
+    {
+      "slug": "ig-pimco-global-bond-fund",
+      "name": "IG PIMCO Global Bond Fund",
+      "code": "F266"
+    },
+    {
+      "slug": "ig-putnam-us-growth-fund",
+      "name": "IG Putnam U.S. Growth Fund",
+      "code": "F219"
+    },
+    {
+      "slug": "ig-putnam-u-s-high-yield-income-fund",
+      "name": "IG Putnam U.S. High Yield Income Fund",
+      "code": "F177"
+    },
+    {
+      "slug": "ig-trowe-price-u-s-large-cap-equity-fund",
+      "name": "IG T. Rowe Price U.S. Large Cap Equity Fund",
+      "code": "F209"
+    }
+  ]
+}

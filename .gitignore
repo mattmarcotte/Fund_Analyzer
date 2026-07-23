@@ -1,0 +1,18 @@
+node_modules
+.next
+out
+build
+.DS_Store
+*.pem
+npm-debug.log*
+.env
+.env*.local
+.vercel
+
+# Machine-local Claude Code settings — records local commands and paths
+.claude/settings.local.json
+.claude
+
+next-env.d.ts
+tsconfig.tsbuildinfo
+.cache

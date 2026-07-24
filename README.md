@@ -7,25 +7,66 @@ Built on free, official data. No paid market-data APIs.
 
 ![Next.js](https://img.shields.io/badge/Next.js-15-black) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue) ![Supabase](https://img.shields.io/badge/Supabase-Postgres-3ecf8e)
 
-## What it does
+## Capabilities
 
-- **US funds** — any SEC-registered ETF or mutual fund, from Form N-PORT.
-- **Canadian ETFs** — iShares Canada, refreshed on demand into Supabase.
-- **Canadian mutual funds** — IG Wealth Management, from published disclosures.
-- **Look-through** — when a fund holds other funds, their holdings are spliced
-  in with weights multiplied down the chain. Expand any row to go deeper.
-- **Charts** — asset allocation, sector, geography, industry.
+### Coverage
 
-### Why look-through is the point
+| Market | Instruments | Source | Freshness |
+|---|---|---|---|
+| 🇺🇸 US | Any SEC-registered ETF or mutual fund | EDGAR Form N-PORT | quarterly, up to 60-day lag |
+| 🇨🇦 Canada | iShares Canada ETFs (173 products) | Provider holdings CSV | **daily** |
+| 🇨🇦 Canada | IG Wealth Management funds (52) | Regulatory disclosure PDFs | quarterly / annual |
 
-`AOR` is the iShares Core 60/40 Balanced ETF. Its own filing reports nine
-holdings, all ETFs, each categorised `Other` — at face value the fund is 100%
-unclassifiable. Expanded, it resolves to ~32,000 securities at **61.6% equity /
-37.1% fixed income**, which is the fund the name describes.
+Search accepts a ticker (`VOO`, `XEQT`) or a fund name (`core equity`), and
+autocompletes across all three sources at once.
 
-`XEQT` goes further: iShares publishes its own look-through, so it resolves to
-**8,463 securities with 0% unresolved**, with GICS sectors attached and no
-EDGAR recursion needed.
+### Look-through — the point of the whole thing
+
+A fund-of-funds tells you almost nothing about itself. Its filing lists other
+funds, and N-PORT categorises those as `Other`, so equity-vs-bond simply doesn't
+exist at the top level. The app resolves it two different ways, preferring the
+better one when it's available:
+
+| | `AOR` (US) | `XEQT` (Canada) |
+|---|---|---|
+| Reported holdings | 9, all `Other` | 7 |
+| Method | **reconstructed** — recursively expand each filing | **provider-published** |
+| Resolves to | ~32,000 securities | 8,463 securities |
+| Unresolved weight | 4.3% | **0%** |
+| Result | 61.6% equity / 37.1% fixed income | 93.5% equity, GICS sectors attached |
+
+Weights multiply down the chain: a 40% position in a fund holding 5% Apple
+contributes 2% Apple. Where a manager publishes its own look-through (iShares
+does), that is used instead of reconstructing the tree — it's their figures, it
+carries GICS sectors, and it needs no upstream requests at all.
+
+Beyond the automatic pass, any row marked `+` in the holdings table expands
+in place, on demand, to whatever depth you care to click — including across
+borders, so a Canadian wrapper drills into the US-listed ETF it owns.
+
+### Analysis
+
+- **Asset allocation** — equity / fixed income / cash / real estate /
+  commodities / derivatives, from the filing's own categories.
+- **Sector** — GICS where the provider publishes it, SIC-derived for US funds
+  with the largest GICS divergences corrected and coverage reported.
+- **Geography** and **industry** breakdowns.
+- **Concentration** — holding count, top-10 weight, funds-inside count.
+- Every figure is dated and links back to the filing it came from.
+
+### Correctness properties
+
+The things that took the most work to get right, and which the app now
+guarantees:
+
+- **Weights are never silently dropped.** Unexpandable funds are reported as
+  unresolved weight rather than quietly omitted.
+- **Values are restated into the portfolio you asked about** — a child fund's
+  `valUSD` is its own position, not your slice of it.
+- **Partial data is labelled partial.** Sector coverage, truncation, and
+  top-25-only disclosures are all surfaced rather than implied to be complete.
+- **Provenance is never overstated.** A chart says whether its sectors are the
+  manager's GICS or our SIC inference, and the two are never mixed.
 
 ## Quick start
 
@@ -221,24 +262,101 @@ Next.js CVE still opens a PR regardless.
 
 ## Architecture
 
+Next.js 15 App Router, TypeScript throughout, Postgres via Supabase. No client
+state library and no ORM — the data model is read-mostly and the shapes are
+dictated by regulatory filings, so both would be overhead.
+
+### The central split: read side vs write side
+
+The single most important structural decision. `lib/providers/` answers "what
+does this fund hold?" and `lib/ingest/` answers "go get it and store it." They
+share types and nothing else.
+
+That separation is what lets a Canadian ETF be served from Postgres in 0.5s
+while a US fund is parsed live from a filing, without either path knowing about
+the other — and it's why adding an issuer touches one directory.
+
 ```
 app/
-  api/fund/[query]        resolve a ticker to holdings
-  api/lookthrough/[query] published look-through, else reconstructed
-  api/enrich              sector/industry resolution for US holdings
+  page.tsx                     search landing
+  fund/[query]/page.tsx        server-rendered dashboard (rate-limited)
+  api/
+    fund/[query]               ticker or name -> FundSnapshot
+    lookthrough/[query]        provider-published if available, else reconstructed
+    enrich                     sector/industry for US holdings, batched
+    search                     autocomplete across all sources
+
 lib/
-  sec/          N-PORT fetching and parsing, SIC lookup, rate-limited client
-  providers/    read side — SEC EDGAR, iShares CA (Supabase), IG Wealth
-  ingest/       write side — provider adapters, refresh logic, Supabase store
-  lookthrough.ts    recursive expansion, weight math, cycle detection
-  fundIndex.ts      name → series matching (exact, token-set, then fuzzy)
-  gleif.ts          LEI → names, for funds renamed since the register snapshot
-components/     dashboard, charts, holdings table
+  types.ts                     Holding, FundSnapshot, LookThroughNode — the shared contract
+  lookthrough.ts               recursive expansion, weight math, cycle detection
+  breakdown.ts                 chart aggregations, absolute-weight based
+  rateLimit.ts                 per-IP limits, enforced in handlers not middleware
+  cache.ts                     TTL cache with request coalescing
+
+  providers/                   READ SIDE — resolve a query to a snapshot
+    index.ts                     registry and resolution order
+    isharesCaStore.ts            Canadian ETFs, served from Supabase
+    ig.ts                        IG Wealth, parsed from disclosure PDFs
+
+  ingest/                      WRITE SIDE — fetch upstream and persist
+    types.ts                     EtfProvider adapter contract
+    providers/isharesCa.ts       screener JSON -> derivable holdings CSV
+    refresh.ts                   read-through staleness logic
+    store.ts                     Supabase reads (publishable) and writes (service-role)
+    csv.ts                       RFC-4180 parsing
+
+  sec/                         EDGAR: rate-limited client, N-PORT parsing, SIC
+  fundIndex.ts                 name -> fund series (exact, token-set, then fuzzy)
+  gleif.ts                     LEI -> legal names, resolving renamed funds
+  match.ts                     holding name -> SEC registrant
+  fundDetect.ts                is this holding itself a fund?
+
+components/                    dashboard, charts, expandable holdings table
+scripts/                       one-off dataset builders and the ingestion CLI
+supabase/migrations/           schema, RLS policies, latest_snapshots view
+data/                          vendored SEC series register + IG fund codes
 ```
 
-Adding a **read** source: implement `fetchSnapshot` and register it in
-`lib/providers/index.ts`. Adding an **ingestion** source: implement
-`EtfProvider` in `lib/ingest/providers/`. Neither touches the other.
+### How a request flows
+
+A fund lookup resolves in a fixed order, most specific first:
+
+```
+query ──> SEC ticker?        ──> parse N-PORT live          ──> FundSnapshot
+      ──> Canadian ETF?      ──> Supabase, refresh if stale ──> FundSnapshot
+      ──> IG fund?           ──> fetch + parse PDFs         ──> FundSnapshot
+      ──> SEC fund name?     ──> series lookup, then N-PORT ──> FundSnapshot
+```
+
+Everything downstream — charts, tables, look-through — consumes `FundSnapshot`
+and never learns which branch produced it. That's what keeps three very
+different upstreams from leaking their shape into the UI.
+
+### Identity resolution
+
+The hardest problem in the app, and the one most of the parsing bugs came from.
+Filings identify holdings inconsistently, so resolution runs in layers, each a
+fallback for the last:
+
+```
+ticker ──> exact          (rarely present for fund holdings)
+name   ──> exact match    -> token-set match -> fuzzy, with a margin test
+LEI    ──> GLEIF          (catches funds renamed since the register snapshot)
+```
+
+The margin test matters: a fuzzy winner must beat the runner-up by a clear gap,
+otherwise the app declines to guess. That's why a bond fund tying between two
+plausible candidates resolves to neither rather than to the wrong one.
+
+### Extending it
+
+- **New read source** — implement `fetchSnapshot`, add it to the resolution
+  order in `lib/providers/index.ts`.
+- **New ingestion source** — implement `EtfProvider` (`listFunds`,
+  `fetchHoldings`) in `lib/ingest/providers/` and register it.
+
+Neither touches the other, the CLI, or the store. Vanguard Canada exposes a JSON
+API keyed by `portId`; BMO is unmapped.
 
 ## Known limits
 

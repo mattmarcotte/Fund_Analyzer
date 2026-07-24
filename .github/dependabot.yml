@@ -62,6 +62,13 @@ updates:
       # they're meant to pass — Dependabot's own 5.9 -> 7.0 PR did exactly that.
       - dependency-name: typescript
         update-types: [version-update:semver-major]
+      # @types/node tracks the Node release line, so its major must match the
+      # runtime rather than lead it. Vercel builds on Node 24; types describing
+      # Node 26 would let TypeScript accept APIs that don't exist in production
+      # — a green typecheck that fails at runtime. Bump this only alongside the
+      # Node version in CI and Vercel.
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
 
     labels:
       - dependencies

@@ -152,6 +152,37 @@ export function findSeriesByTicker(ticker: string): FundSeries | null {
   return build().byTicker.get(ticker.trim().toUpperCase()) ?? null;
 }
 
+/** Minimum token overlap for a cross-exchange ticker match to be believed. */
+const CROSS_LISTING_MIN_SIMILARITY = 0.35;
+
+/**
+ * Resolve a ticker against the US fund register, but only when the holding's
+ * own name agrees.
+ *
+ * Ticker namespaces collide across exchanges, and the collisions are not rare:
+ * Canadian `DOL` is Dollarama, while US `DOL` is the WisdomTree International
+ * LargeCap Dividend Fund; `FM` is First Quantum Minerals here and an iShares
+ * frontier-markets ETF there. Trusting the symbol alone marks ordinary
+ * operating companies as funds and offers a drill-down into an unrelated
+ * portfolio.
+ *
+ * Requiring the names to agree keeps the genuine cross-border case — a Canadian
+ * wrapper holding a US-listed ETF, where both sides read "iShares Core S&P
+ * Total U.S. Stock…" — and rejects the coincidences.
+ */
+export function findSeriesByTickerAndName(
+  ticker: string | null,
+  name: string,
+): FundSeries | null {
+  if (!ticker || !name) return null;
+
+  const series = findSeriesByTicker(ticker);
+  if (!series) return null;
+
+  const score = similarity(fundTokens(name), fundTokens(series.name));
+  return score >= CROSS_LISTING_MIN_SIMILARITY ? series : null;
+}
+
 export function findSeriesById(seriesId: string): FundSeries | null {
   return build().bySeriesId.get(seriesId) ?? null;
 }

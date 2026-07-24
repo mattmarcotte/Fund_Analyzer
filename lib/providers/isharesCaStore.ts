@@ -1,5 +1,5 @@
 import { looksLikeFund } from "@/lib/fundDetect";
-import { findSeriesByTicker } from "@/lib/fundIndex";
+import { findSeriesByTickerAndName } from "@/lib/fundIndex";
 import {
   availableLayers,
   findStoredFund,
@@ -92,9 +92,11 @@ function toHolding(row: StoredHolding, fundTickers: Set<string>): Holding {
       ((row.ticker !== null &&
         (fundTickers.has(row.ticker.toUpperCase()) ||
           // Canadian wrappers routinely hold US-listed ETFs (XEQT owns ITOT),
-          // which live in the SEC register rather than this catalogue. Checking
-          // both is what makes drilling across the border work.
-          findSeriesByTicker(row.ticker) !== null)) ||
+          // which live in the SEC register rather than this catalogue. The name
+          // has to agree as well as the symbol: ticker namespaces collide
+          // across exchanges, and CA "DOL" (Dollarama) would otherwise resolve
+          // to a US dividend fund.
+          findSeriesByTickerAndName(row.ticker, row.name) !== null)) ||
         looksLikeFund(row.name, "CORP")),
     sector,
     industry: null,

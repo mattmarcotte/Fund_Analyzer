@@ -1,0 +1,68 @@
+name: CI
+
+# Gives Dependabot's pull requests something to prove themselves against. A
+# dependency bump that opens with no signal isn't much better than no bump at
+# all — this is what makes those PRs safe to merge on sight.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Lets a run be kicked off by hand after a dependency change lands.
+  workflow_dispatch:
+
+# A new push supersedes an in-flight run for the same ref.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Typecheck & build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          # Matches the Node version Vercel builds with, so a green run here
+          # means the same toolchain that produces the deployment.
+          node-version: 24
+          cache: npm
+
+      # `ci` rather than `install`: fails on a lockfile that has drifted from
+      # package.json, which is exactly what a bad dependency PR looks like.
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        # No secrets: the build reads only vendored datasets. Supabase and SEC
+        # credentials are runtime concerns, and CI should never need them.
+        run: npm run build
+
+  audit:
+    name: Security audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # Fails on high and critical only. Moderates are reported without
+      # blocking, so a transitive advisory in a dev tool can't wedge every
+      # unrelated pull request.
+      - name: npm audit (high and critical)
+        run: npm audit --audit-level=high
+
+      - name: Full advisory report
+        if: always()
+        run: npm audit || true

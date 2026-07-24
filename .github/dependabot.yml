@@ -1,0 +1,72 @@
+# Dependabot configuration
+#
+# This exists because the project was pinned to a Next.js release that had
+# accumulated 29 advisories — including a critical RCE — and the first thing to
+# notice was Vercel refusing to deploy it. Catching that in a pull request beats
+# discovering it at deploy time.
+#
+# Note this file only governs *version* update PRs. Dependabot security updates
+# and vulnerability alerts are repository settings, enabled separately.
+
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: America/Toronto
+    open-pull-requests-limit: 5
+
+    # Batched so routine bumps arrive as one reviewable PR rather than a dozen.
+    # Majors are deliberately excluded from the groups: those carry breaking
+    # changes and deserve to be read on their own.
+    groups:
+      production-minor-patch:
+        applies-to: version-updates
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+      development-minor-patch:
+        applies-to: version-updates
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+      # Security fixes ship immediately and together, regardless of semver:
+      # waiting a week to batch a patched CVE defeats the point.
+      security:
+        applies-to: security-updates
+        patterns:
+          - "*"
+
+    ignore:
+      # React and Next are version-locked to each other in practice, and a major
+      # bump of either is a migration rather than a dependency update. Security
+      # updates are unaffected by this — `ignore` doesn't apply to them.
+      - dependency-name: next
+        update-types: [version-update:semver-major]
+      - dependency-name: react
+        update-types: [version-update:semver-major]
+      - dependency-name: react-dom
+        update-types: [version-update:semver-major]
+
+    labels:
+      - dependencies
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: scope
+
+  # Keeps the CI workflow's own actions current; they run with repo credentials.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    labels:
+      - dependencies
+    commit-message:
+      prefix: "ci"

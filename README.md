@@ -200,6 +200,25 @@ so the real ceiling is (limit x warm instances). That covers the actual threat �
 an unattended crawler — but not a distributed attacker. For that, swap `hit()`
 in `lib/rateLimit.ts` for a Vercel KV or Postgres counter; no call sites change.
 
+## Dependency security
+
+The first deployment was refused by Vercel for shipping a Next.js release with
+29 open advisories, including a critical RCE. Noticing that at deploy time is
+too late, so the repo is configured to surface it earlier:
+
+- **Dependabot alerts and automated security fixes** are enabled, so a patched
+  CVE opens a pull request without waiting for the weekly cycle.
+- **`.github/dependabot.yml`** batches routine minor/patch bumps into one weekly
+  PR, keeps majors separate, and never batches security updates.
+- **`.github/workflows/ci.yml`** runs typecheck, build and `npm audit` on every
+  PR, so a dependency bump arrives with evidence rather than hope. The audit
+  gate fails on high and critical only — a moderate advisory in a dev tool
+  shouldn't wedge unrelated work.
+
+Next and React majors are excluded from automatic version PRs: those are
+migrations, not bumps. `ignore` rules don't apply to security updates, so a
+Next.js CVE still opens a PR regardless.
+
 ## Architecture
 
 ```
